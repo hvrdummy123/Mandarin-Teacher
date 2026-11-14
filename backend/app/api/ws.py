@@ -30,6 +30,8 @@ async def voice_ws(websocket: WebSocket) -> None:
     vad = FrameVAD()
     turn_active = False
     auto_ended = False
+    # Tap-to-talk waits for explicit turn.end; VAD auto-end only in hands-free.
+    hands_free = False
 
     async def send_json(payload: dict[str, object]) -> None:
         await websocket.send_text(json.dumps(payload, ensure_ascii=False))
@@ -52,31 +54,37 @@ async def voice_ws(websocket: WebSocket) -> None:
                     vad.reset()
                     turn_active = True
                     auto_ended = False
+                    hands_free = bool(data.get("hands_free", False))
                 elif typ == "turn.end" and turn_active:
                     turn_active = False
+                    heard_hint = data.get("heard_hint")
+                    hint = heard_hint if isinstance(heard_hint, str) else None
                     await _finish_turn(
                         state,
                         session_id,
                         bytes(pcm_buf),
                         send_json,
                         send_bytes,
+                        heard_hint=hint,
                     )
+                    pcm_buf.clear()
             elif "bytes" in message and message["bytes"] is not None and turn_active:
                 frame = message["bytes"]
                 pcm_buf.extend(frame)
                 max_bytes = 16000 * 2 * 60
                 if len(pcm_buf) > max_bytes:
                     pcm_buf[:] = pcm_buf[-max_bytes:]
-                if not auto_ended and vad.accept(frame):
+                if hands_free and not auto_ended and vad.accept(frame):
                     auto_ended = True
                     turn_active = False
-                    await send_json({"type": "turn.end"})
+                    await send_json({"type": "vad.end"})
                     await _finish_turn(
                         state,
                         session_id,
                         bytes(pcm_buf),
                         send_json,
                         send_bytes,
+                        heard_hint=None,
                     )
                     pcm_buf.clear()
     except WebSocketDisconnect:
@@ -93,6 +101,8 @@ async def _finish_turn(
     pcm: bytes,
     send_json: SendJson,
     send_bytes: SendBytes,
+    *,
+    heard_hint: str | None = None,
 ) -> None:
     if session_id is None:
         await send_json({"type": "error", "detail": "No session.start yet"})
@@ -114,6 +124,7 @@ async def _finish_turn(
             send_json=send_json,
             send_bytes=send_bytes,
             timings_sink=state.timings,
+            heard_hint=heard_hint,
         )
         db.commit()
     except Exception as exc:

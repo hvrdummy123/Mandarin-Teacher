@@ -8,8 +8,6 @@ import httpx
 
 
 class OpenRouterAdapter:
-    name = "openrouter"
-
     def __init__(
         self,
         api_key: str,
@@ -17,7 +15,9 @@ class OpenRouterAdapter:
         reply_model: str,
         analysis_model: str,
         timeout_s: float = 45.0,
+        name: str = "openrouter",
     ) -> None:
+        self.name = name
         self.api_key = api_key
         self.reply_model = reply_model
         self.analysis_model = analysis_model

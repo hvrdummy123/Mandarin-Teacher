@@ -2,13 +2,30 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 
-from app.api.schemas import LevelInfoOut, TopicOut
+from app.api.schemas import EnrichTextOut, EnrichTextRequest, LevelInfoOut, TopicOut
 from app.domain.level import level_for_tier, rules_for_level, tier_for_level
 from app.domain.topics import get_topic, load_topics
 
 router = APIRouter(prefix="/api", tags=["meta"])
+
+
+def _rough_translation(tokens: list[dict[str, object]]) -> str:
+    """Dictionary gloss join for live display (not a full sentence translation)."""
+    bits: list[str] = []
+    for tok in tokens:
+        surface = str(tok.get("surface") or "")
+        defs = tok.get("definitions")
+        if isinstance(defs, list) and defs and isinstance(defs[0], str):
+            # CEDICT defs often "surname / hello / ..." — take first sense.
+            sense = defs[0].split("/")[0].strip()
+            if sense:
+                bits.append(sense)
+                continue
+        if surface.strip():
+            bits.append(surface)
+    return " ".join(bits)
 
 
 @router.get("/topics", response_model=list[TopicOut])
@@ -85,3 +102,41 @@ def levels_query(tier: int | None = Query(default=None)) -> dict[str, int | Leve
             ),
         }
     return {"min": 1, "max": 100}
+
+
+@router.post("/enrich", response_model=EnrichTextOut)
+def enrich_text(body: EnrichTextRequest, request: Request) -> EnrichTextOut:
+    """Fast local enrichment for live speech draft (hanzi → pinyin + rough English).
+
+    When topic_id is set, optionally repairs likely STT mix-ups (借口→家, 名词→名字).
+    """
+    from app.application.transcript_repair import repair_transcript
+
+    container = request.app.state.container
+    services = getattr(container, "chat_services", None)
+    if services is None:
+        raise HTTPException(status_code=503, detail="Dictionary / analyzer not ready")
+
+    original = body.text
+    text = body.text
+    repaired = False
+    repair_note = ""
+    if body.repair and body.topic_id:
+        result = repair_transcript(body.text, topic_id=body.topic_id)
+        text = result.text
+        repaired = result.changed
+        repair_note = result.note
+
+    tokens = services.analyzer.tokens_as_dicts(text)
+    pinyin_line = " ".join(
+        str(t.get("pinyin") or t.get("surface") or "") for t in tokens if t.get("surface")
+    ).strip()
+    return EnrichTextOut(
+        text=text,
+        tokens=tokens,
+        translation_en=_rough_translation(tokens),
+        pinyin_line=pinyin_line,
+        original_text=original if repaired else None,
+        repaired=repaired,
+        repair_note=repair_note,
+    )

@@ -104,4 +104,31 @@ export const api = {
     json<SavedWord[]>(`/api/words${q ? `?q=${encodeURIComponent(q)}` : ""}`),
   deleteWord: (id: number) => json<{ status: string }>(`/api/words/${id}`, { method: "DELETE" }),
   progress: () => json<Progress>("/api/progress"),
+  enrich: (text: string, opts?: { topic_id?: string | null; repair?: boolean }) =>
+    json<{
+      text: string;
+      tokens: Token[];
+      translation_en: string;
+      pinyin_line: string;
+      original_text?: string | null;
+      repaired?: boolean;
+      repair_note?: string;
+    }>("/api/enrich", {
+      method: "POST",
+      body: JSON.stringify({
+        text,
+        topic_id: opts?.topic_id ?? null,
+        repair: opts?.repair ?? true,
+      }),
+    }),
+  /** Returns an MP3 blob URL for the AI voice (caller should revoke). */
+  ttsBlob: async (text: string): Promise<Blob> => {
+    const res = await fetch(`${API}/api/tts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    if (!res.ok) throw new Error((await res.text()) || res.statusText);
+    return res.blob();
+  },
 };

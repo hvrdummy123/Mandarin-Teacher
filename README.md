@@ -4,9 +4,13 @@ I built this because I study Mandarin in apps but have almost nobody to speak wi
 
 ## Status
 
-**Phase 2 (voice + English UI)** works: English-first chrome (optional Chinese labels), four screens (Chat / Topics / Saved words / Progress), mic-primary input with text fallback, topic role-play with AI opening first, WebSocket voice (VAD + Whisper + TTS). Tone scoring is still Phase 5; spoken audio is saved for later.
+**Phase 2 (voice + English UI)** works: English-first chrome (optional Chinese labels), four screens (Chat / Topics / Saved words / Progress), mic-primary input with text fallback, topic role-play with AI opening first, WebSocket voice (Whisper + TTS).
 
-UI copy is English by default. Use **Hide Chinese labels** if you only want English.
+**How to talk:** tap the mic → speak → tap again when done. While you speak, a live bubble updates with Chinese / pinyin / English. Your finished bubble also gets all three (English refined after analysis). Hear word / Hear sentence / Hear this use the AI voice.
+
+**Speed:** SQLite is fine — the old lag was Gemini 429s + Whisper `small` on CPU + waiting for analysis before TTS. Defaults are now OpenRouter-first, Whisper `base` (+ MPS on Apple Silicon), browser transcript preferred over Whisper when available, and TTS overlaps analysis. Restart `make dev` after pulling.
+
+Tone scoring is still Phase 5; spoken audio is saved for later. Use **Hide Chinese labels** if you only want English.
 
 ## Setup
 

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "clean_zh",
+    "text": "你好，我想点一份牛肉面，谢谢。",
+    "filename": "clean_zh.wav",
+    "note": "clean Chinese sentence",
+    "path": "backend/tests/e2e_audio/fixtures/clean_zh.wav",
+    "duration_s": 3.576,
+    "sample_rate": 16000
+  },
+  {
+    "id": "mixed_zh_en",
+    "text": "我想要一杯 coffee，可以吗？谢谢。",
+    "filename": "mixed_zh_en.wav",
+    "note": "Chinese mixed with English word",
+    "path": "backend/tests/e2e_audio/fixtures/mixed_zh_en.wav",
+    "duration_s": 4.032,
+    "sample_rate": 16000
+  }
+]

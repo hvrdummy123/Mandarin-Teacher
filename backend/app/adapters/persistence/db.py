@@ -29,9 +29,12 @@ def create_db_engine(settings: Settings) -> Engine:
 
     connect_args: dict[str, object] = {}
     if url.startswith("sqlite"):
+        # Wait up to 30s on lock instead of failing immediately (voice holds writes less now,
+        # but enrich/tts can still overlap briefly).
         connect_args["check_same_thread"] = False
+        connect_args["timeout"] = 30.0
 
-    engine = create_engine(url, connect_args=connect_args, future=True)
+    engine = create_engine(url, connect_args=connect_args, future=True, pool_pre_ping=True)
 
     if url.startswith("sqlite"):
 
@@ -39,6 +42,8 @@ def create_db_engine(settings: Settings) -> Engine:
         def _set_sqlite_pragma(dbapi_connection: object, _connection_record: object) -> None:
             cursor = dbapi_connection.cursor()  # type: ignore[attr-defined]
             cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA synchronous=NORMAL")
+            cursor.execute("PRAGMA busy_timeout=30000")
             cursor.execute("PRAGMA foreign_keys=ON")
             cursor.close()
 

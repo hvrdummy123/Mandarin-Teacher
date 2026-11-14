@@ -17,14 +17,17 @@ export function TopicsScreen() {
   async function startTopic(topicId: string) {
     setBusyId(topicId);
     setError(null);
+    // Jump to chat immediately; opening is local/canned and should return in ms.
+    setTopicId(topicId);
+    setView("chat");
+    setMessages([]);
     try {
       const opened = await api.openTopic({ topic_id: topicId, level });
-      setTopicId(topicId);
       setSessionId(opened.session.id);
       setMessages([opened.assistant_message]);
-      setView("chat");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not start topic");
+      setView("topics");
     } finally {
       setBusyId(null);
     }

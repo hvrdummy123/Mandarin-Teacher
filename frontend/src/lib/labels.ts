@@ -24,14 +24,19 @@ export const LABELS = {
   saved: { en: "Saved", zh: "已保存" },
   close: { en: "Close", zh: "关闭" },
   play: { en: "Play", zh: "播放" },
+  playWord: { en: "Hear word", zh: "听单词" },
+  playSentence: { en: "Hear sentence", zh: "听整句" },
+  playMessage: { en: "Hear this", zh: "听这个" },
+  playCorrection: { en: "Hear correction", zh: "听正确说法" },
   search: { en: "Search", zh: "搜索" },
   delete: { en: "Delete", zh: "删除" },
-  mic: { en: "Hold to speak", zh: "按住说话" },
-  micTap: { en: "Tap mic to talk", zh: "点麦克风说话" },
+  mic: { en: "Speak", zh: "说话" },
+  micTap: { en: "Tap to speak", zh: "点一下开始说" },
+  micDone: { en: "Tap when you're done", zh: "说完再点一下" },
   typeFallback: { en: "Or type as a fallback…", zh: "或打字…" },
   chatEmpty: {
-    en: "Free conversation at your level. Hold the mic and speak Mandarin — typing is only a backup.",
-    zh: "按住麦克风说中文；打字只是备用。",
+    en: "Free conversation at your level. Tap the mic, speak Mandarin (English words OK), tap again when done.",
+    zh: "点麦克风说中文（可以夹杂英文），说完再点一下。",
   },
   topicsTitle: { en: "Topics", zh: "话题" },
   topicsHint: {
@@ -50,6 +55,15 @@ export const LABELS = {
   start: { en: "Start", zh: "开始" },
   showTranslation: { en: "Show translation", zh: "显示翻译" },
   heard: { en: "Heard", zh: "听到的" },
+  suggestion: { en: "I think you meant…", zh: "你是不是想说…" },
+  reviewBeforeSend: { en: "Review before send", zh: "先看再发送" },
+  reviewHint: {
+    en: "On: check the transcript, then Send or Discard. Off: send as soon as you finish speaking.",
+    zh: "开：先看识别结果再发送或重录。关：说完立刻发送。",
+  },
+  confirmSend: { en: "Send", zh: "发送" },
+  discard: { en: "Discard", zh: "重录" },
+  pendingReview: { en: "Check this before sending", zh: "发送前请确认" },
 } as const;
 
 export function label(item: L, showZh: boolean): string {

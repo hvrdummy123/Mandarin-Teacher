@@ -54,16 +54,33 @@ def build_llm_chain(settings: Settings, extra: list[LLMProvider] | None = None) 
                     settings.gemini_api_key,
                     reply_model=settings.gemini_reply_model,
                     analysis_model=settings.gemini_analysis_model,
+                    timeout_s=settings.llm_timeout_s,
                 )
             )
         elif name == "openrouter" and settings.openrouter_api_key:
-            providers.append(
-                OpenRouterAdapter(
-                    settings.openrouter_api_key,
-                    reply_model=settings.openrouter_reply_model,
-                    analysis_model=settings.openrouter_analysis_model,
+            reply_models = [
+                m.strip() for m in settings.openrouter_reply_model.split(",") if m.strip()
+            ]
+            analysis_models = [
+                m.strip() for m in settings.openrouter_analysis_model.split(",") if m.strip()
+            ]
+            if not reply_models:
+                reply_models = ["qwen/qwen-2.5-7b-instruct:free"]
+            if not analysis_models:
+                analysis_models = reply_models
+            # One adapter per model so a 429 on model A still allows model B.
+            for i, reply_model in enumerate(reply_models):
+                analysis_model = analysis_models[min(i, len(analysis_models) - 1)]
+                short = reply_model.split("/")[-1][:24]
+                providers.append(
+                    OpenRouterAdapter(
+                        settings.openrouter_api_key,
+                        name=f"openrouter:{short}",
+                        reply_model=reply_model,
+                        analysis_model=analysis_model,
+                        timeout_s=settings.llm_timeout_s,
+                    )
                 )
-            )
         elif name == "ollama" and settings.ollama_base_url:
             providers.append(
                 OllamaAdapter(
@@ -134,6 +151,7 @@ def build_container(
     state.stt = FasterWhisperAdapter(
         model_size=settings.whisper_model_size,
         compute_type=settings.whisper_compute_type,
+        device=settings.whisper_device,
         download_root=Path(settings.data_dir) / "whisper",
     )
     # Lazy-load Whisper on first use (or eagerly if load_whisper and not in tests).

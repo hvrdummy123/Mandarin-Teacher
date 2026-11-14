@@ -1,4 +1,4 @@
-.PHONY: setup data migrate dev test lint bench e2e frontend-install
+.PHONY: setup data migrate dev test lint bench e2e frontend-install portfolio
 
 UV ?= uv
 PYTHONPATH := backend
@@ -42,3 +42,6 @@ bench:
 
 e2e:
 	cd frontend && npx playwright test
+
+portfolio:
+	node scripts/portfolio/record.mjs

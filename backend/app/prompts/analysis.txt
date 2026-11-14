@@ -7,14 +7,17 @@ Your reply was: {{reply_text}}
 
 Schema:
 {
-  "translation_en": "English of the learner's message",
+  "translation_en": "English of what the learner likely meant",
   "reply_translation_en": "English of your reply",
-  "correction": null or {"better": "more natural Chinese", "reason": "one short English line"},
+  "correction": null or {"better": "natural Chinese the learner should say here", "reason": "one short English line starting with I think you meant… or Try…"},
   "goal_progress": 0.0 to 1.0,
   "goal_done": false,
-  "suggested_words": ["up to three useful words from the exchange"]
+  "suggested_words": ["up to three useful words for this topic"]
 }
 
-If the learner's Chinese is already natural, set correction to null.
-If the message is broken Chinese mixed with English, still translate the likely meaning and offer a natural Chinese correction when helpful.
+Rules for correction:
+- If this is a topic role-play and the learner's line is off-topic, garbled, or only a fragment (e.g. STT heard 名词 instead of 名字), ALWAYS set correction with a natural line that fits the user goal.
+- Prefer one clear model answer, e.g. for introductions: 我叫 Mary。 / 我是学生。
+- If the Chinese is already natural and on-topic, set correction to null.
+- If the message mixes English names/words, keep those names and wrap them in natural Chinese.
 Keep reasons simple. suggested_words max 3.

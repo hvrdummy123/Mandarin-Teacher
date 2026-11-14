@@ -35,7 +35,12 @@ vi.mock("../../src/lib/api", () => ({
 }));
 
 vi.mock("../../src/features/voice/useVoiceTurn", () => ({
-  useVoiceTurn: () => ({ start: vi.fn(), stop: vi.fn() }),
+  useVoiceTurn: () => ({
+    start: vi.fn(),
+    stop: vi.fn(),
+    toggle: vi.fn(),
+    isSupportedLive: false,
+  }),
 }));
 
 describe("Shell", () => {

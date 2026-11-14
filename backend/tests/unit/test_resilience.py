@@ -85,3 +85,18 @@ async def test_fallback_all_fail() -> None:
     )
     with pytest.raises(AllProvidersFailed):
         await chain.complete(system="s", user="u")
+
+
+@pytest.mark.asyncio
+async def test_fallback_force_probe_when_all_breakers_open() -> None:
+    """User must not get stuck with 'no providers available' forever."""
+    primary = FakeLLM(name="a", reply_text="recovered")
+    chain = FallbackChain(providers=[primary], attempts=1)
+    br = chain._breaker("a")
+    br.record_failure()
+    br.record_failure()
+    assert br.state == BreakerState.OPEN
+    # Recovery timeout still running — _eligible should force a half-open probe.
+    text = await chain.complete(system="s", user="u")
+    assert text == "recovered"
+    assert br.state == BreakerState.CLOSED

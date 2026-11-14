@@ -25,6 +25,22 @@ class SendMessageRequest(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
 
 
+class EnrichTextRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=2000)
+    topic_id: str | None = None
+    repair: bool = True
+
+
+class EnrichTextOut(BaseModel):
+    text: str
+    tokens: list[dict[str, Any]]
+    translation_en: str
+    pinyin_line: str
+    original_text: str | None = None
+    repaired: bool = False
+    repair_note: str = ""
+
+
 class SaveWordRequest(BaseModel):
     word: str
     pinyin: str = ""

@@ -1,64 +1,74 @@
-import { useRef } from "react";
 import { label, LABELS } from "../../lib/labels";
 import { useUiStore } from "../../lib/store";
 
 type Props = {
   disabled?: boolean;
-  onPushStart: () => void;
-  onPushEnd: () => void;
+  /** Tap once to start, tap again when done (Airlearn-style). */
+  onToggle: () => void;
 };
 
 const STATE_COPY: Record<string, string> = {
-  idle: "Ready",
-  listening: "Listening…",
+  idle: "Tap to speak",
+  listening: "Listening… tap when done",
   thinking: "Thinking…",
   speaking: "Speaking…",
-  error: "Mic error",
+  error: "Mic error — tap to retry",
 };
 
-export function MicButton({ disabled, onPushStart, onPushEnd }: Props) {
+export function MicButton({ disabled, onToggle }: Props) {
   const showZh = useUiStore((s) => s.showZhLabels);
   const micState = useUiStore((s) => s.micState);
-  const pressed = useRef(false);
 
-  const active = micState === "listening";
+  const listening = micState === "listening";
+  const busy = micState === "thinking" || micState === "speaking";
 
   return (
-    <div className="flex flex-col items-center gap-2 py-3">
+    <div className="flex flex-col items-center gap-3 py-3">
+      {listening ? (
+        <div className="flex h-8 w-full max-w-sm items-center justify-center px-4" aria-hidden>
+          <Waveform />
+        </div>
+      ) : (
+        <div className="h-8" />
+      )}
+
       <button
         type="button"
-        disabled={disabled || micState === "thinking" || micState === "speaking"}
+        disabled={disabled || busy}
         aria-label={label(LABELS.mic, showZh)}
+        aria-pressed={listening}
         className={`relative flex h-24 w-24 items-center justify-center rounded-full border-4 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-vermilion disabled:opacity-50 ${
-          active
-            ? "border-vermilion bg-vermilion/20 scale-105"
-            : "border-jade/50 bg-jade/10 hover:bg-jade/20"
+          listening
+            ? "scale-105 border-jade bg-jade text-paper shadow-lg shadow-jade/30"
+            : "border-jade/50 bg-jade/15 text-ink hover:bg-jade/25"
         }`}
-        onPointerDown={(e) => {
-          e.preventDefault();
-          pressed.current = true;
-          (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-          onPushStart();
-        }}
-        onPointerUp={() => {
-          if (!pressed.current) return;
-          pressed.current = false;
-          onPushEnd();
-        }}
-        onPointerCancel={() => {
-          if (!pressed.current) return;
-          pressed.current = false;
-          onPushEnd();
-        }}
+        onClick={() => onToggle()}
       >
         <MicIcon />
-        {active ? (
-          <span className="absolute inset-0 animate-ping rounded-full border-2 border-vermilion/40" />
+        {listening ? (
+          <span className="absolute inset-0 animate-ping rounded-full border-2 border-jade/40" />
         ) : null}
       </button>
+
       <p className="text-sm text-muted">{STATE_COPY[micState] ?? "Ready"}</p>
-      <p className="text-xs text-muted">{label(LABELS.micTap, showZh)}</p>
+      <p className="text-xs text-muted">
+        {listening ? label(LABELS.micDone, showZh) : label(LABELS.micTap, showZh)}
+      </p>
     </div>
+  );
+}
+
+function Waveform() {
+  return (
+    <svg viewBox="0 0 240 32" className="h-8 w-full text-jade" fill="none">
+      <path
+        className="motion-safe:animate-pulse"
+        d="M0 16 Q20 4 40 16 T80 16 T120 16 T160 16 T200 16 T240 16"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 

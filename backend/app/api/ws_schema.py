@@ -19,6 +19,7 @@ class SessionStart(BaseModel):
 
 class TurnStart(BaseModel):
     type: Literal["turn.start"] = "turn.start"
+    hands_free: bool = False
 
 
 class TurnEnd(BaseModel):

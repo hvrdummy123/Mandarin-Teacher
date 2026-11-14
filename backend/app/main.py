@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import debug, health, meta, progress, sessions, words, ws
+from app.api import debug, health, meta, progress, sessions, tts, words, ws
 from app.config import get_settings
 from app.container import AppState, build_container
 from app.logging import get_logger, setup_logging
@@ -49,6 +49,7 @@ def create_app(container: AppState | None = None) -> FastAPI:
     app.include_router(words.router)
     app.include_router(meta.router)
     app.include_router(progress.router)
+    app.include_router(tts.router)
     app.include_router(ws.router)
 
     if container is not None:

@@ -36,18 +36,27 @@ class Settings(BaseSettings):
     gemini_analysis_model: str = "gemini-flash-lite-latest"
 
     openrouter_api_key: str = ""
-    openrouter_reply_model: str = "openrouter/free"
-    openrouter_analysis_model: str = "openrouter/free"
+    # Comma-separated free models — each is tried separately so one 429 does not kill chat.
+    openrouter_reply_model: str = (
+        "qwen/qwen-2.5-7b-instruct:free,"
+        "google/gemma-2-9b-it:free,"
+        "meta-llama/llama-3.2-3b-instruct:free"
+    )
+    openrouter_analysis_model: str = "qwen/qwen-2.5-7b-instruct:free,google/gemma-2-9b-it:free"
 
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_reply_model: str = "qwen2.5:7b"
     ollama_analysis_model: str = "qwen2.5:7b"
 
-    # Ollama is opt-in so a fresh clone without API keys stays "not ready" for LLM.
-    llm_providers: str = "gemini,openrouter"
+    # Prefer the working free provider first — Gemini free tier 429s block conversation.
+    llm_providers: str = "openrouter,gemini"
+    # Fail fast so a dead provider does not burn 60s before fallback.
+    llm_timeout_s: float = 12.0
 
-    whisper_model_size: str = "small"
+    # base+MPS is ~3–5× faster than small+CPU on Apple Silicon; accuracy still fine for chat.
+    whisper_model_size: str = "base"
     whisper_compute_type: str = "int8"
+    whisper_device: str = "auto"  # auto | cpu | mps
     tts_voice: str = "zh-CN-XiaoxiaoNeural"
     tts_cache_dir: Path = Path("data/tts_cache")
 

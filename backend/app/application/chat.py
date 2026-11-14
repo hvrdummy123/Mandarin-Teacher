@@ -152,47 +152,25 @@ async def open_topic_with_ai(
     topic_id: str,
     level: int,
 ) -> dict[str, object]:
-    """Create a topic session and have the AI speak first in role."""
+    """Create a topic session with an instant canned opening (no LLM wait)."""
+    from app.domain.topics import instant_opening
+
     topic = get_topic(topic_id)
     if topic is None:
         raise ValueError("topic not found")
     session = create_session(db, mode="topic", topic_id=topic_id, level=level)
-    vocab_hint = services.hint_for_level(session.level)
-    rules = rules_for_level(session.level)
-    system = render(
-        "opening.txt",
-        level=session.level,
-        hsk_band=rules.hsk_band,
-        max_chars=rules.max_sentence_chars,
-        topic_block=_topic_block(topic),
-        vocab_hint="、".join(vocab_hint) or "(basic greetings)",
-    )
-    try:
-        reply = await services.llm.complete(
-            system=system,
-            user="(session start — greet me in character now)",
-            json_mode=False,
-        )
-    except AllProvidersFailed as exc:
-        raise RuntimeError(str(exc)) from exc
-
-    analysis = await analyse_turn(
-        services,
-        level=session.level,
-        topic=topic,
-        user_text="(session start)",
-        reply_text=reply,
-    )
+    reply, reply_en = instant_opening(topic)
     tokens = services.analyzer.tokens_as_dicts(reply)
     assistant_msg = m.Message(
         session_id=session.id,
         role="assistant",
         text=reply,
         pinyin_json=tokens,
-        translation=analysis.reply_translation_en or None,
+        translation=reply_en,
     )
     db.add(assistant_msg)
     db.flush()
+    db.commit()
     return {
         "session": {
             "id": session.id,
@@ -228,10 +206,50 @@ async def send_text_message(
         vocab_hint=vocab_hint,
     )
 
+    # Persist the user line first with a rough gloss, then call the LLM — keeps SQLite unlocked.
+    user_tokens = services.analyzer.tokens_as_dicts(text)
+    interim_bits: list[str] = []
+    for tok in user_tokens:
+        defs = tok.get("definitions")
+        if isinstance(defs, list) and defs and isinstance(defs[0], str):
+            interim_bits.append(defs[0].split("/")[0].strip())
+        else:
+            interim_bits.append(str(tok.get("surface") or ""))
+    user_msg = m.Message(
+        session_id=session.id,
+        role="user",
+        text=text,
+        pinyin_json=user_tokens,
+        translation=" ".join(b for b in interim_bits if b) or None,
+    )
+    db.add(user_msg)
+    db.flush()
+    user_id = user_msg.id
+    db.commit()
+
+    prior = (
+        db.query(m.Message)
+        .filter(m.Message.session_id == session_id, m.Message.id != user_id)
+        .order_by(m.Message.id.desc())
+        .limit(8)
+        .all()
+    )
+    prior.reverse()
+    history_lines = [f"{row.role}: {row.text}" for row in prior]
+    llm_user = text
+    if history_lines:
+        llm_user = (
+            "Recent conversation (stay in this context):\n"
+            + "\n".join(history_lines)
+            + f"\n\nLearner just said: {text}"
+        )
+
     try:
-        first = await services.llm.complete(system=system, user=text, json_mode=False)
+        first = await services.llm.complete(system=system, user=llm_user, json_mode=False)
     except AllProvidersFailed as exc:
-        raise RuntimeError(str(exc)) from exc
+        raise RuntimeError(
+            "AI is rate-limited right now (free-tier 429). Wait ~30–60s and try again."
+        ) from exc
 
     async def _regen(forbidden: list[str]) -> str:
         sys2 = _build_reply_prompt(
@@ -241,7 +259,7 @@ async def send_text_message(
             vocab_hint=vocab_hint,
             forbidden=forbidden,
         )
-        return await services.llm.complete(system=sys2, user=text, json_mode=False)
+        return await services.llm.complete(system=sys2, user=llm_user, json_mode=False)
 
     checked = await enforce_level_on_reply(
         _regen,
@@ -260,7 +278,6 @@ async def send_text_message(
         regenerated=regenerated,
         out_of_level=out_words,
     )
-
     analysis = await analyse_turn(
         services,
         level=session.level,
@@ -269,23 +286,14 @@ async def send_text_message(
         reply_text=reply,
     )
 
-    user_tokens = services.analyzer.tokens_as_dicts(text)
     reply_tokens = services.analyzer.tokens_as_dicts(reply, out_of_level=set(out_words))
-
-    user_msg = m.Message(
-        session_id=session.id,
-        role="user",
-        text=text,
-        pinyin_json=user_tokens,
-        translation=analysis.translation_en or None,
-    )
-    db.add(user_msg)
-    db.flush()
-
-    if analysis.correction is not None:
+    user_row = db.get(m.Message, user_id)
+    if user_row is not None and analysis.translation_en:
+        user_row.translation = analysis.translation_en
+    if user_row is not None and analysis.correction is not None:
         db.add(
             m.Correction(
-                message_id=user_msg.id,
+                message_id=user_id,
                 original=text,
                 better=analysis.correction.better,
                 reason=analysis.correction.reason,
@@ -293,7 +301,7 @@ async def send_text_message(
         )
 
     assistant_msg = m.Message(
-        session_id=session.id,
+        session_id=session_id,
         role="assistant",
         text=reply,
         pinyin_json=reply_tokens,
@@ -303,7 +311,7 @@ async def send_text_message(
     db.flush()
 
     return {
-        "user_message": _message_dict(user_msg, analysis.correction),
+        "user_message": _message_dict(user_row or user_msg, analysis.correction),
         "assistant_message": _message_dict(assistant_msg, None),
         "analysis": analysis.model_dump(),
         "level_postcheck": {

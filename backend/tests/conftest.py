@@ -19,6 +19,19 @@ from app.config import Settings, get_settings
 from app.container import AppState, build_chat_services
 from app.main import create_app
 
+
+class FakeTTS:
+    name = "fake-tts"
+
+    async def synthesize(self, text: str, *, rate: str = "+0%") -> bytes:
+        return b"ID3" + text.encode("utf-8")
+
+    async def stream_sentences(self, text: str, *, rate: str = "+0%"):
+        data = await self.synthesize(text, rate=rate)
+        if data:
+            yield data
+
+
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -69,7 +82,7 @@ def app_state(tmp_settings: Settings, migrated_engine: Engine, fake_llm: FakeLLM
         llm=llm,
         chat_services=build_chat_services(tmp_settings, dictionary, llm),
         stt=None,
-        tts=None,
+        tts=FakeTTS(),
     )
     # Pretend dictionary file exists for readiness probes that check the path.
     Path(tmp_settings.dictionary_db_path).write_bytes(b"x")

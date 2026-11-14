@@ -1,0 +1,122 @@
+{
+  "restaurant": {
+    "zh": "你好！欢迎光临。请问几位？想喝点什么？",
+    "en": "Hello! Welcome. How many people? What would you like to drink?"
+  },
+  "cafe": {
+    "zh": "你好！想喝咖啡还是茶？今天有拿铁。",
+    "en": "Hi! Coffee or tea? We have latte today."
+  },
+  "street_food": {
+    "zh": "来看看！要不要来一份？不辣也可以。",
+    "en": "Come take a look! Want one? Mild is fine too."
+  },
+  "grocery": {
+    "zh": "你好，需要帮忙吗？新鲜蔬菜在这边。",
+    "en": "Hello, need help? Fresh vegetables are over here."
+  },
+  "clothes": {
+    "zh": "这件衣服不错。你要什么尺码？可以试穿。",
+    "en": "This outfit is nice. What size? You can try it on."
+  },
+  "introduce": {
+    "zh": "你好！我是你的新同学。你叫什么名字？",
+    "en": "Hi! I'm your new classmate. What's your name?"
+  },
+  "family": {
+    "zh": "你家有几口人？跟我说说你的家人吧。",
+    "en": "How many people in your family? Tell me about them."
+  },
+  "friends": {
+    "zh": "这个周末有空吗？我们一起出去怎么样？",
+    "en": "Free this weekend? How about we go out together?"
+  },
+  "weather": {
+    "zh": "今天天气真不错。你喜欢春天还是秋天？",
+    "en": "Nice weather today. Do you prefer spring or autumn?"
+  },
+  "directions": {
+    "zh": "你好，你要去哪里？我可以告诉你怎么走。",
+    "en": "Hi, where are you going? I can tell you the way."
+  },
+  "taxi": {
+    "zh": "你好，去哪里？请说一下地址。",
+    "en": "Hi, where to? Please tell me the address."
+  },
+  "metro": {
+    "zh": "你好，你要坐几号线？需要换乘吗？",
+    "en": "Hi, which line? Do you need to transfer?"
+  },
+  "airport": {
+    "zh": "你好，请出示护照。你的航班是几点的？",
+    "en": "Hello, passport please. What time is your flight?"
+  },
+  "hotel": {
+    "zh": "欢迎光临！请问有预订吗？我帮你办入住。",
+    "en": "Welcome! Do you have a reservation? I'll check you in."
+  },
+  "phone_booking": {
+    "zh": "你好，这里是前台。请问想预约什么时间？几位？",
+    "en": "Hello, front desk. What time would you like? For how many?"
+  },
+  "doctor": {
+    "zh": "你好，哪里不舒服？是头痛还是发烧？",
+    "en": "Hello, what's wrong? Headache or fever?"
+  },
+  "banking": {
+    "zh": "一共二十八块。你用微信支付还是支付宝？",
+    "en": "That's 28 yuan. WeChat Pay or Alipay?"
+  },
+  "phone_problems": {
+    "zh": "网络连不上吗？你先试试重启手机。",
+    "en": "Can't connect? Try restarting your phone first."
+  },
+  "job_interview": {
+    "zh": "请先介绍一下你自己。你为什么想做这份工作？",
+    "en": "Please introduce yourself. Why do you want this job?"
+  },
+  "office": {
+    "zh": "嗨，今天下午有个会。你能帮我看一下邮件吗？",
+    "en": "Hey, there's a meeting this afternoon. Can you help check an email?"
+  },
+  "studying": {
+    "zh": "你学什么专业？最近考试多吗？",
+    "en": "What's your major? Many exams lately?"
+  },
+  "hobbies": {
+    "zh": "你空闲时间喜欢做什么？有什么爱好？",
+    "en": "What do you like to do in free time? Any hobbies?"
+  },
+  "sports": {
+    "zh": "你平时锻炼吗？我喜欢跑步，你呢？",
+    "en": "Do you exercise? I like running — you?"
+  },
+  "movies": {
+    "zh": "最近看了什么好看的电影？给我推荐一个吧。",
+    "en": "Seen any good movies lately? Recommend one!"
+  },
+  "cooking": {
+    "zh": "你会做菜吗？最简单的一道是什么？",
+    "en": "Can you cook? What's the simplest dish you make?"
+  },
+  "festivals": {
+    "zh": "春节快到了！你家一般怎么过节？",
+    "en": "Spring Festival is coming! How does your family celebrate?"
+  },
+  "renting": {
+    "zh": "这间房一个月房租多少？押金呢？有家具吗？",
+    "en": "What's the monthly rent? Deposit? Is it furnished?"
+  },
+  "travel": {
+    "zh": "我们一起去旅行吧！你想去哪个城市？",
+    "en": "Let's travel together! Which city do you want?"
+  },
+  "news": {
+    "zh": "你今天看新闻了吗？你觉得这件事怎么样？",
+    "en": "Did you see the news today? What do you think about it?"
+  },
+  "tech": {
+    "zh": "你手机上最常用哪个应用？它方便吗？",
+    "en": "Which app do you use most? Is it convenient?"
+  }
+}

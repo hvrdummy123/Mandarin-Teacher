@@ -1,5 +1,7 @@
+import { useState } from "react";
 import type { Token } from "../../lib/api";
 import { label, LABELS } from "../../lib/labels";
+import { playTts } from "../../lib/playTts";
 import { useUiStore } from "../../lib/store";
 
 type Props = {
@@ -12,6 +14,8 @@ type Props = {
 
 export function WordPopover({ token, contextSentence, onSave, onClose, saved }: Props) {
   const showZh = useUiStore((s) => s.showZhLabels);
+  const [playing, setPlaying] = useState<"word" | "sentence" | null>(null);
+  const [playError, setPlayError] = useState<string | null>(null);
 
   if (!token) {
     return (
@@ -20,6 +24,18 @@ export function WordPopover({ token, contextSentence, onSave, onClose, saved }: 
         {showZh ? <span className="block text-xs">点一个词看看意思。</span> : null}
       </div>
     );
+  }
+
+  async function hear(which: "word" | "sentence", text: string) {
+    setPlayError(null);
+    setPlaying(which);
+    try {
+      await playTts(text);
+    } catch (err) {
+      setPlayError(err instanceof Error ? err.message : "Playback failed");
+    } finally {
+      setPlaying(null);
+    }
   }
 
   return (
@@ -60,15 +76,25 @@ export function WordPopover({ token, contextSentence, onSave, onClose, saved }: 
           </ul>
         </div>
       ) : null}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          disabled
-          title="TTS replay comes with voice Phase 2 playback of single words"
-          className="rounded border border-muted/40 px-3 py-1.5 text-sm text-muted opacity-60"
+          disabled={playing !== null}
+          onClick={() => void hear("word", token.surface)}
+          className="rounded border border-jade/50 bg-jade/10 px-3 py-1.5 text-sm text-ink hover:bg-jade/20 disabled:opacity-50"
         >
-          {label(LABELS.play, showZh)}
+          {playing === "word" ? "…" : label(LABELS.playWord, showZh)}
         </button>
+        {contextSentence ? (
+          <button
+            type="button"
+            disabled={playing !== null}
+            onClick={() => void hear("sentence", contextSentence)}
+            className="rounded border border-jade/50 bg-jade/10 px-3 py-1.5 text-sm text-ink hover:bg-jade/20 disabled:opacity-50"
+          >
+            {playing === "sentence" ? "…" : label(LABELS.playSentence, showZh)}
+          </button>
+        ) : null}
         <button
           type="button"
           onClick={() => onSave(token)}
@@ -78,6 +104,11 @@ export function WordPopover({ token, contextSentence, onSave, onClose, saved }: 
           {saved ? label(LABELS.saved, showZh) : label(LABELS.save, showZh)}
         </button>
       </div>
+      {playError ? (
+        <p className="text-xs text-vermilion" role="alert">
+          {playError}
+        </p>
+      ) : null}
       {contextSentence ? <p className="text-xs text-muted">From: {contextSentence}</p> : null}
     </div>
   );

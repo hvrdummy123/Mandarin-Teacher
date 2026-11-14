@@ -69,7 +69,7 @@ test.describe("UI checklist", () => {
   test("mic is primary control on Chat", async ({ page }) => {
     await page.route("**/api/topics", (route) => route.fulfill({ json: [] }));
     await page.goto("/");
-    await expect(page.getByRole("button", { name: /Hold to speak|Tap mic/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Speak|Tap to speak/i })).toBeVisible();
     await expect(page.getByPlaceholder(/fallback/i)).toBeVisible();
   });
 });

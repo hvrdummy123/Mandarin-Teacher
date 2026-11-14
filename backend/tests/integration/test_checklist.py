@@ -10,8 +10,6 @@ from app.application.text_analyzer import TextAnalyzer
 
 
 def test_restaurant_level5_reply(client: TestClient, fake_llm: FakeLLM) -> None:
-    fake_llm.reply_text = "你好，请问几位？"
-    fake_llm.reply_queue = ["你好，请问几位？"]
     r = client.post(
         "/api/sessions/open-topic",
         json={"topic_id": "restaurant", "level": 5},
@@ -19,7 +17,10 @@ def test_restaurant_level5_reply(client: TestClient, fake_llm: FakeLLM) -> None:
     assert r.status_code == 200
     body = r.json()
     assert body["session"]["topic_id"] == "restaurant"
-    assert body["assistant_message"]["text"]
+    # Instant canned opening — no LLM round-trip.
+    opening = body["assistant_message"]["text"]
+    assert "欢迎" in opening or "你好" in opening
+    assert body["assistant_message"].get("translation")
     sid = body["session"]["id"]
     fake_llm.reply_text = "好的，这是菜单。"
     turn = client.post(f"/api/sessions/{sid}/messages", json={"text": "我想吃面条"})

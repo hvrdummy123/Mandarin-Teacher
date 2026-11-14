@@ -27,12 +27,16 @@ type UiState = {
   messages: Message[];
   setMessages: (messages: Message[]) => void;
   appendMessages: (messages: Message[]) => void;
+  patchMessage: (id: number, patch: Partial<Message>) => void;
   topics: Topic[];
   setTopics: (topics: Topic[]) => void;
   topicId: string | null;
   setTopicId: (id: string | null) => void;
   micState: "idle" | "listening" | "thinking" | "speaking" | "error";
   setMicState: (s: UiState["micState"]) => void;
+  /** When on: speak → review transcript → confirm/send (or discard). */
+  reviewBeforeSend: boolean;
+  toggleReviewBeforeSend: () => void;
 };
 
 export const useUiStore = create<UiState>((set, get) => ({
@@ -71,10 +75,21 @@ export const useUiStore = create<UiState>((set, get) => ({
   messages: [],
   setMessages: (messages) => set({ messages }),
   appendMessages: (messages) => set({ messages: [...get().messages, ...messages] }),
+  patchMessage: (id, patch) =>
+    set({
+      messages: get().messages.map((m) => (m.id === id ? { ...m, ...patch } : m)),
+    }),
   topics: [],
   setTopics: (topics) => set({ topics }),
   topicId: null,
   setTopicId: (id) => set({ topicId: id }),
   micState: "idle",
   setMicState: (micState) => set({ micState }),
+  reviewBeforeSend:
+    typeof localStorage !== "undefined" && localStorage.getItem("duihua-review") === "1",
+  toggleReviewBeforeSend: () => {
+    const next = !get().reviewBeforeSend;
+    localStorage.setItem("duihua-review", next ? "1" : "0");
+    set({ reviewBeforeSend: next });
+  },
 }));
