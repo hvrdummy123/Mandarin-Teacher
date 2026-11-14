@@ -16,4 +16,5 @@ Schema:
 }
 
 If the learner's Chinese is already natural, set correction to null.
+If the message is broken Chinese mixed with English, still translate the likely meaning and offer a natural Chinese correction when helpful.
 Keep reasons simple. suggested_words max 3.

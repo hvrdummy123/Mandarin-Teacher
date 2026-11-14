@@ -79,3 +79,22 @@ class ChatTurnOut(BaseModel):
     assistant_message: MessageOut
     analysis: dict[str, Any]
     level_postcheck: dict[str, Any]
+
+
+class OpenTopicRequest(BaseModel):
+    topic_id: str
+    level: int = Field(default=10, ge=1, le=100)
+
+
+class OpenTopicOut(BaseModel):
+    session: SessionOut
+    assistant_message: MessageOut
+
+
+class ProgressOut(BaseModel):
+    xp_today: int = 0
+    daily_goal: int = 100
+    streak: int = 0
+    level: int = 1
+    tier: int = 1
+    note: str = "Progress tracking fills in during Phase 3. These are stubs."

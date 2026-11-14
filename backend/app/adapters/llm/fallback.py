@@ -59,16 +59,22 @@ class FallbackChain:
                 text = await with_retry(
                     _call,
                     attempts=self.attempts,
-                    retry_on=RETRYABLE + (httpx.HTTPStatusError,),
+                    retry_on=RETRYABLE,
                 )
+            except httpx.HTTPStatusError as exc:
+                code = exc.response.status_code
+                errors.append(f"{provider.name}: {exc}")
+                # 404 (bad model id) / 401: don't burn the breaker; just skip.
+                if code in {401, 403, 404}:
+                    log.warning("llm_provider_skip", provider=provider.name, status=code)
+                    continue
+                if code == 429 or code >= 500:
+                    br.record_failure()
+                else:
+                    br.record_failure()
+                log.warning("llm_provider_failed", provider=provider.name, error=str(exc))
+                continue
             except Exception as exc:
-                # Also treat 429 / 5xx surfaced as HTTPStatusError
-                if isinstance(exc, httpx.HTTPStatusError):
-                    code = exc.response.status_code
-                    if code != 429 and code < 500:
-                        errors.append(f"{provider.name}: {exc}")
-                        br.record_failure()
-                        continue
                 br.record_failure()
                 errors.append(f"{provider.name}: {exc}")
                 log.warning("llm_provider_failed", provider=provider.name, error=str(exc))

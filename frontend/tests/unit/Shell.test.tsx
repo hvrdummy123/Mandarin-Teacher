@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Shell } from "../../src/components/Shell";
 
 vi.mock("../../src/lib/api", () => ({
@@ -18,10 +18,24 @@ vi.mock("../../src/lib/api", () => ({
       },
     ]),
     createSession: vi.fn(),
+    openTopic: vi.fn(),
     sendMessage: vi.fn(),
     saveWord: vi.fn(),
     listWords: vi.fn().mockResolvedValue([]),
+    deleteWord: vi.fn(),
+    progress: vi.fn().mockResolvedValue({
+      xp_today: 0,
+      daily_goal: 100,
+      streak: 0,
+      level: 10,
+      tier: 1,
+      note: "stub",
+    }),
   },
+}));
+
+vi.mock("../../src/features/voice/useVoiceTurn", () => ({
+  useVoiceTurn: () => ({ start: vi.fn(), stop: vi.fn() }),
 }));
 
 describe("Shell", () => {
@@ -29,13 +43,17 @@ describe("Shell", () => {
     localStorage.clear();
   });
 
-  it("shows brand and transcript toggles", async () => {
+  it("shows English rail labels and distinct screens", async () => {
     const user = userEvent.setup();
     render(<Shell />);
-    expect(screen.getAllByText("对话").length).toBeGreaterThan(0);
-    expect(screen.getByText(/准备好了再说/)).toBeInTheDocument();
-    const pinyin = screen.getByRole("button", { name: "拼音" });
-    await user.click(pinyin);
-    expect(pinyin).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getAllByRole("button", { name: /Chat/ }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: /Topics/ }).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Free conversation at your level/)).toBeInTheDocument();
+
+    await user.click(screen.getAllByRole("button", { name: /Topics/ })[0]!);
+    expect(await screen.findByText(/Pick a scenario/)).toBeInTheDocument();
+
+    await user.click(screen.getAllByRole("button", { name: /Progress/ })[0]!);
+    expect(await screen.findByText(/XP today/)).toBeInTheDocument();
   });
 });

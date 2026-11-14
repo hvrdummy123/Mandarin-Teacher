@@ -18,6 +18,8 @@ export type Message = {
   translation: string | null;
   correction: { better: string; reason: string } | null;
   created_at: string | null;
+  audio_path?: string | null;
+  heard_raw?: string | null;
 };
 
 export type Topic = {
@@ -36,6 +38,24 @@ export type Session = {
   mode: string;
   topic_id: string | null;
   level: number;
+};
+
+export type Progress = {
+  xp_today: number;
+  daily_goal: number;
+  streak: number;
+  level: number;
+  tier: number;
+  note: string;
+};
+
+export type SavedWord = {
+  id: number;
+  word: string;
+  pinyin: string;
+  definition: string;
+  hsk_level: number | null;
+  context_sentence: string | null;
 };
 
 async function json<T>(path: string, init?: RequestInit): Promise<T> {
@@ -57,6 +77,11 @@ export const api = {
   topics: () => json<Topic[]>("/api/topics"),
   createSession: (body: { mode: string; topic_id: string | null; level: number }) =>
     json<Session>("/api/sessions", { method: "POST", body: JSON.stringify(body) }),
+  openTopic: (body: { topic_id: string; level: number }) =>
+    json<{ session: Session; assistant_message: Message }>("/api/sessions/open-topic", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
   sendMessage: (sessionId: number, text: string) =>
     json<{
       user_message: Message;
@@ -67,21 +92,16 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ text }),
     }),
+  listMessages: (sessionId: number) => json<Message[]>(`/api/sessions/${sessionId}/messages`),
   saveWord: (body: {
     word: string;
     pinyin: string;
     definition: string;
     hsk_level: number | null;
     context_sentence: string | null;
-  }) => json("/api/words", { method: "POST", body: JSON.stringify(body) }),
-  listWords: () =>
-    json<
-      {
-        id: number;
-        word: string;
-        pinyin: string;
-        definition: string;
-        hsk_level: number | null;
-      }[]
-    >("/api/words"),
+  }) => json<SavedWord>("/api/words", { method: "POST", body: JSON.stringify(body) }),
+  listWords: (q?: string) =>
+    json<SavedWord[]>(`/api/words${q ? `?q=${encodeURIComponent(q)}` : ""}`),
+  deleteWord: (id: number) => json<{ status: string }>(`/api/words/${id}`, { method: "DELETE" }),
+  progress: () => json<Progress>("/api/progress"),
 };

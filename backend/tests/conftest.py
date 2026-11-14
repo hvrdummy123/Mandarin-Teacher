@@ -68,6 +68,8 @@ def app_state(tmp_settings: Settings, migrated_engine: Engine, fake_llm: FakeLLM
         dictionary=dictionary,
         llm=llm,
         chat_services=build_chat_services(tmp_settings, dictionary, llm),
+        stt=None,
+        tts=None,
     )
     # Pretend dictionary file exists for readiness probes that check the path.
     Path(tmp_settings.dictionary_db_path).write_bytes(b"x")

@@ -28,6 +28,9 @@ test:
 	$(UV) run pytest backend/tests -q
 	cd frontend && npm test -- --run
 
+live-smoke:
+	$(UV) run python scripts/live_smoke.py
+
 lint:
 	$(UV) run ruff check backend
 	$(UV) run ruff format --check backend

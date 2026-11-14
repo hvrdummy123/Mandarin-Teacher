@@ -1,56 +1,48 @@
 # Test report
 
-## Phase 0
+## Phase 0–1 (earlier)
 
-Commands run (2026-11-14, local macOS, Python 3.12 via uv, Node 22):
+See git history. Superseded by totals below.
 
-```bash
-uv sync --group dev
-uv run ruff check backend
-uv run ruff format --check backend
-uv run mypy
-PYTHONPATH=backend uv run pytest backend/tests -q
-cd frontend && npm install && npm run lint && npx tsc --noEmit && npm test -- --run && npm run build
-uv run python scripts/fetch_data.py --out data/dictionary.db --cache data/cache
-# smoke: uvicorn on :8010 → GET /healthz, GET /readyz
-```
+## Phase 2 + UI fixes (2026-11-14)
 
-| Suite | Result |
-| --- | --- |
-| Backend unit + integration | **10 passed** (P0 baseline; superseded by P1 totals below) |
-| Ruff / mypy | **pass** |
-| Frontend | **pass** |
-| `make data` | **pass** |
-
-### Could not verify (P0)
-
-- Real microphone / Whisper / live LLM; CI on a clean runner; full interactive `make dev`.
-
----
-
-## Phase 1
-
-Commands run (2026-11-14):
+### Commands
 
 ```bash
 uv run ruff check backend && uv run ruff format --check backend && uv run mypy
-PYTHONPATH=backend uv run pytest backend/tests -q \
-  --cov=backend/app/domain --cov=backend/app/application --cov-report=term-missing
+PYTHONPATH=backend uv run pytest backend/tests -q
 cd frontend && npm run lint && npx tsc --noEmit && npm test -- --run && npm run build
+cd frontend && npx playwright test
+PYTHONPATH=backend uv run python scripts/live_smoke.py
 ```
+
+### Results
 
 | Suite | Result |
 | --- | --- |
-| Backend tests | **35 passed** |
-| domain/ + application/ coverage | **90%** (target ≥85%) |
+| Backend pytest | **42 passed** (checklist automation + VAD + prior P1) |
 | Ruff + mypy | **pass** |
-| Frontend eslint / tsc | **pass** |
-| Vitest | **4 passed** (Shell toggles, RubyText, tones) |
-| Vite build | **pass** (JS gzip ≈ 51 KB) |
+| Vitest | **4 passed** |
+| Playwright e2e | **2 passed** (English rail, distinct screens, mic primary) |
+| `scripts/live_smoke.py` (real providers) | **pass** via OpenRouter (Gemini 503 → fallback) |
+| Vite build | **pass** |
 
-### Could not verify (P1)
+### Live checklist (real providers)
 
-- Live Gemini / OpenRouter / Ollama replies (tests use `FakeLLM`; adapters are wired but not called without keys).
-- Hover "播放" TTS (deferred to P2; button disabled).
-- Playwright e2e text-chat flow (SPEC lists broader e2e later; P1 covered by Vitest + REST integration).
-- GitHub Actions on a clean runner.
+| Check | Result |
+| --- | --- |
+| Level 5 + restaurant open + message | **pass** (opening + reply in Chinese) |
+| 银行 → yínháng, 不对 → búduì | **pass** (`yín háng` / `bú duì`) |
+| Wrong sentence → correction card | **pass** |
+| Save word + list again | **pass** |
+| Level 60 reply ≠ level 5 | **pass** (len 10 vs 29; harder vocab) |
+
+Gemini returned 503 on this run; OpenRouter free models completed every LLM step. Automated FakeLLM checklist lives in `backend/tests/integration/test_checklist.py`; UI checklist in `frontend/tests/e2e/checklist.spec.ts`.
+
+### Could not verify
+
+- Real microphone push-to-talk end-to-end (AudioWorklet + Whisper load + TTS playback). Whisper is not loaded during `live_smoke` (`load_whisper=False`).
+- Hands-free comfort / 20-minute conversation feel.
+- Gemini primary path (503 / unavailable; OpenRouter worked).
+- Tone scoring (Phase 5); per-turn WAV is saved under `data/audio/{session_id}/` for later.
+- CI on a clean remote runner.

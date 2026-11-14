@@ -4,7 +4,9 @@ I built this because I study Mandarin in apps but have almost nobody to speak wi
 
 ## Status
 
-**Phase 1 (text chat)** works: sessions, FakeLLM/real LLM fallback chain, rich transcript (ruby pinyin + hover + save word), corrections, level/topic pickers, level post-check. Voice and tone scoring are still later.
+**Phase 2 (voice + English UI)** works: English-first chrome (optional Chinese labels), four screens (Chat / Topics / Saved words / Progress), mic-primary input with text fallback, topic role-play with AI opening first, WebSocket voice (VAD + Whisper + TTS). Tone scoring is still Phase 5; spoken audio is saved for later.
+
+UI copy is English by default. Use **Hide Chinese labels** if you only want English.
 
 ## Setup
 

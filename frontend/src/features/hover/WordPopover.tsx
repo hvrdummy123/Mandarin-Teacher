@@ -1,4 +1,6 @@
 import type { Token } from "../../lib/api";
+import { label, LABELS } from "../../lib/labels";
+import { useUiStore } from "../../lib/store";
 
 type Props = {
   token: Token | null;
@@ -9,10 +11,13 @@ type Props = {
 };
 
 export function WordPopover({ token, contextSentence, onSave, onClose, saved }: Props) {
+  const showZh = useUiStore((s) => s.showZhLabels);
+
   if (!token) {
     return (
       <div className="text-sm text-muted">
-        点一个词，看看意思。Hover or focus a word.
+        Click or focus a word to see meanings.
+        {showZh ? <span className="block text-xs">点一个词看看意思。</span> : null}
       </div>
     );
   }
@@ -24,13 +29,8 @@ export function WordPopover({ token, contextSentence, onSave, onClose, saved }: 
           <p className="font-serif text-2xl text-ink">{token.surface}</p>
           <p className="text-sm text-muted">{token.pinyin}</p>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="text-sm text-muted hover:text-ink"
-          aria-label="Close"
-        >
-          关闭
+        <button type="button" onClick={onClose} className="text-sm text-muted hover:text-ink">
+          {label(LABELS.close, showZh)}
         </button>
       </div>
       {token.hsk != null ? (
@@ -42,11 +42,13 @@ export function WordPopover({ token, contextSentence, onSave, onClose, saved }: 
         {token.definitions.slice(0, 3).map((d) => (
           <li key={d}>{d}</li>
         ))}
-        {token.definitions.length === 0 ? <li className="text-muted">词典里没有这条。</li> : null}
+        {token.definitions.length === 0 ? (
+          <li className="text-muted">No dictionary entry for this token.</li>
+        ) : null}
       </ul>
       {token.chars.length > 0 ? (
         <div>
-          <p className="mb-1 text-xs uppercase tracking-wide text-muted">按字</p>
+          <p className="mb-1 text-xs uppercase tracking-wide text-muted">Characters</p>
           <ul className="space-y-1 text-sm">
             {token.chars.map((c) => (
               <li key={c.ch}>
@@ -62,10 +64,10 @@ export function WordPopover({ token, contextSentence, onSave, onClose, saved }: 
         <button
           type="button"
           disabled
-          title="Voice replay lands with TTS in Phase 2"
+          title="TTS replay comes with voice Phase 2 playback of single words"
           className="rounded border border-muted/40 px-3 py-1.5 text-sm text-muted opacity-60"
         >
-          播放
+          {label(LABELS.play, showZh)}
         </button>
         <button
           type="button"
@@ -73,12 +75,10 @@ export function WordPopover({ token, contextSentence, onSave, onClose, saved }: 
           disabled={saved}
           className="rounded bg-vermilion px-3 py-1.5 text-sm text-paper hover:opacity-90 disabled:opacity-50"
         >
-          {saved ? "已保存" : "收藏"}
+          {saved ? label(LABELS.saved, showZh) : label(LABELS.save, showZh)}
         </button>
       </div>
-      {contextSentence ? (
-        <p className="text-xs text-muted">出处：{contextSentence}</p>
-      ) : null}
+      {contextSentence ? <p className="text-xs text-muted">From: {contextSentence}</p> : null}
     </div>
   );
 }

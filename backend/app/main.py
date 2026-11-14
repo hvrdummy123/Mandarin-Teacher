@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import debug, health, meta, sessions, words
+from app.api import debug, health, meta, progress, sessions, words, ws
 from app.config import get_settings
 from app.container import AppState, build_container
 from app.logging import get_logger, setup_logging
@@ -20,7 +20,8 @@ log = get_logger(__name__)
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     setup_logging(settings.log_level)
-    container = build_container(settings)
+    # Whisper load can take a while on first run; do it at startup so /readyz is honest.
+    container = build_container(settings, load_whisper=True)
     app.state.container = container
     log.info("app_started", host=settings.host, port=settings.port)
     yield
@@ -47,6 +48,8 @@ def create_app(container: AppState | None = None) -> FastAPI:
     app.include_router(sessions.router)
     app.include_router(words.router)
     app.include_router(meta.router)
+    app.include_router(progress.router)
+    app.include_router(ws.router)
 
     if container is not None:
         app.state.container = container

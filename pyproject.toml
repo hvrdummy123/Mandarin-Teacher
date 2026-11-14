@@ -23,6 +23,7 @@ dependencies = [
     "numpy>=1.26.0",
     "pillow>=10.4.0",
     "python-multipart>=0.0.12",
+    "setuptools>=75.0.0",
 ]
 
 [dependency-groups]

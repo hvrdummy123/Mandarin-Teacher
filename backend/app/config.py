@@ -32,12 +32,12 @@ class Settings(BaseSettings):
     database_url: str = f"sqlite:///{REPO_ROOT / 'data' / 'duihua.db'}"
 
     gemini_api_key: str = ""
-    gemini_reply_model: str = "gemini-2.0-flash"
-    gemini_analysis_model: str = "gemini-2.0-flash-lite"
+    gemini_reply_model: str = "gemini-flash-latest"
+    gemini_analysis_model: str = "gemini-flash-lite-latest"
 
     openrouter_api_key: str = ""
-    openrouter_reply_model: str = "qwen/qwen-2.5-7b-instruct:free"
-    openrouter_analysis_model: str = "qwen/qwen-2.5-7b-instruct:free"
+    openrouter_reply_model: str = "openrouter/free"
+    openrouter_analysis_model: str = "openrouter/free"
 
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_reply_model: str = "qwen2.5:7b"

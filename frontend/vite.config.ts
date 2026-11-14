@@ -16,6 +16,10 @@ export default defineConfig({
       "/api": "http://127.0.0.1:8000",
       "/healthz": "http://127.0.0.1:8000",
       "/readyz": "http://127.0.0.1:8000",
+      "/ws": {
+        target: "ws://127.0.0.1:8000",
+        ws: true,
+      },
     },
   },
   test: {

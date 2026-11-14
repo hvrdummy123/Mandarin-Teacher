@@ -14,6 +14,8 @@ from app.adapters.llm.gemini import GeminiAdapter
 from app.adapters.llm.ollama import OllamaAdapter
 from app.adapters.llm.openrouter import OpenRouterAdapter
 from app.adapters.persistence.db import create_db_engine, make_session_factory
+from app.adapters.stt.faster_whisper_adapter import FasterWhisperAdapter
+from app.adapters.tts.edge import EdgeTTSAdapter
 from app.application.chat import ChatServices
 from app.application.text_analyzer import TextAnalyzer
 from app.config import Settings, get_settings
@@ -32,11 +34,15 @@ class AppState:
     dictionary: DictionaryRepo | None = None
     llm: FallbackChain | None = None
     chat_services: ChatServices | None = None
+    stt: FasterWhisperAdapter | None = None
+    tts: EdgeTTSAdapter | None = None
     timings: list[dict[str, object]] = field(default_factory=list)
 
     def refresh_readiness_flags(self) -> None:
         dict_path = Path(self.settings.dictionary_db_path)
         self.settings.dictionary_loaded = dict_path.is_file() and dict_path.stat().st_size > 0
+        if self.stt is not None:
+            self.settings.whisper_loaded = self.stt.loaded
 
 
 def build_llm_chain(settings: Settings, extra: list[LLMProvider] | None = None) -> FallbackChain:
@@ -80,10 +86,11 @@ def build_chat_services(
             ranked = dictionary.words_by_hsk_then_freq(12000)
         except Exception:
             ranked = []
-    if not ranked and hasattr(dictionary, "hsk"):
-        # Memory dict in tests: sort by HSK then word.
-        hsk_map: dict[str, int] = dictionary.hsk
-        ranked = sorted(hsk_map.keys(), key=lambda w: (hsk_map[w], w))
+    from app.adapters.dictionary.memory import MemoryDictionary
+
+    if not ranked and isinstance(dictionary, MemoryDictionary):
+        ranked = sorted(dictionary.hsk.keys(), key=lambda w: (dictionary.hsk[w], w))
+
     return ChatServices(
         llm=llm,
         analyzer=TextAnalyzer(dictionary),
@@ -97,6 +104,7 @@ def build_container(
     *,
     llm: FallbackChain | None = None,
     dictionary: DictionaryRepo | None = None,
+    load_whisper: bool = True,
 ) -> AppState:
     settings = settings or get_settings()
     settings.data_dir.mkdir(parents=True, exist_ok=True)
@@ -118,6 +126,22 @@ def build_container(
     state.llm = llm or build_llm_chain(settings)
     if dictionary is not None and state.llm is not None:
         state.chat_services = build_chat_services(settings, dictionary, state.llm)
+
+    state.tts = EdgeTTSAdapter(
+        voice=settings.tts_voice,
+        cache_dir=Path(settings.tts_cache_dir),
+    )
+    state.stt = FasterWhisperAdapter(
+        model_size=settings.whisper_model_size,
+        compute_type=settings.whisper_compute_type,
+        download_root=Path(settings.data_dir) / "whisper",
+    )
+    # Lazy-load Whisper on first use (or eagerly if load_whisper and not in tests).
+    if load_whisper:
+        try:
+            state.stt.load()
+        except Exception as exc:
+            log.warning("whisper_load_failed", error=str(exc))
 
     state.refresh_readiness_flags()
     log.info(

@@ -11,6 +11,8 @@ from app.api.schemas import (
     ChatTurnOut,
     CreateSessionRequest,
     MessageOut,
+    OpenTopicOut,
+    OpenTopicRequest,
     SendMessageRequest,
     SessionOut,
 )
@@ -75,6 +77,23 @@ def list_messages(session_id: int, db: Session = Depends(get_db)) -> list[Messag
             )
         )
     return out
+
+
+@router.post("/open-topic", response_model=OpenTopicOut)
+async def open_topic(
+    body: OpenTopicRequest,
+    db: Session = Depends(get_db),
+    services: ChatServices = Depends(get_chat_services),
+) -> OpenTopicOut:
+    try:
+        result = await chat_uc.open_topic_with_ai(
+            db, services, topic_id=body.topic_id, level=body.level
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return OpenTopicOut.model_validate(result)
 
 
 @router.post("/{session_id}/messages", response_model=ChatTurnOut)

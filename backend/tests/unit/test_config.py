@@ -17,5 +17,9 @@ def test_default_bind_is_localhost() -> None:
 
 
 def test_gemini_counts_as_configured() -> None:
-    settings = Settings(gemini_api_key="abc", llm_providers="gemini,openrouter")
+    settings = Settings(
+        gemini_api_key="abc",
+        openrouter_api_key="",
+        llm_providers="gemini,openrouter",
+    )
     assert settings.configured_llm_providers() == ["gemini"]

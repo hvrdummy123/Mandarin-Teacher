@@ -2,10 +2,14 @@ import { create } from "zustand";
 import { applyTheme, initialTheme, type Theme } from "./theme";
 import type { Message, Topic } from "./api";
 
+export type View = "chat" | "topics" | "words" | "progress";
+
 type UiState = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
+  showZhLabels: boolean;
+  toggleZhLabels: () => void;
   showPinyin: boolean;
   showHanzi: boolean;
   showEnglish: boolean;
@@ -14,10 +18,10 @@ type UiState = {
   toggleEnglish: () => void;
   level: number;
   tier: number;
-  topicId: string | null;
   setLevel: (level: number) => void;
   setTier: (tier: number) => void;
-  setTopicId: (id: string | null) => void;
+  view: View;
+  setView: (view: View) => void;
   sessionId: number | null;
   setSessionId: (id: number | null) => void;
   messages: Message[];
@@ -25,6 +29,10 @@ type UiState = {
   appendMessages: (messages: Message[]) => void;
   topics: Topic[];
   setTopics: (topics: Topic[]) => void;
+  topicId: string | null;
+  setTopicId: (id: string | null) => void;
+  micState: "idle" | "listening" | "thinking" | "speaking" | "error";
+  setMicState: (s: UiState["micState"]) => void;
 };
 
 export const useUiStore = create<UiState>((set, get) => ({
@@ -38,15 +46,16 @@ export const useUiStore = create<UiState>((set, get) => ({
     applyTheme(next);
     set({ theme: next });
   },
+  showZhLabels: true,
+  toggleZhLabels: () => set({ showZhLabels: !get().showZhLabels }),
   showPinyin: true,
   showHanzi: true,
-  showEnglish: false,
+  showEnglish: true,
   togglePinyin: () => set({ showPinyin: !get().showPinyin }),
   toggleHanzi: () => set({ showHanzi: !get().showHanzi }),
   toggleEnglish: () => set({ showEnglish: !get().showEnglish }),
   level: 10,
   tier: 1,
-  topicId: "introduce",
   setLevel: (level) => {
     const clamped = Math.max(1, Math.min(100, level));
     set({ level: clamped, tier: Math.floor((clamped - 1) / 10) + 1 });
@@ -55,7 +64,8 @@ export const useUiStore = create<UiState>((set, get) => ({
     const t = Math.max(1, Math.min(10, tier));
     set({ tier: t, level: (t - 1) * 10 + 1 });
   },
-  setTopicId: (id) => set({ topicId: id }),
+  view: "chat",
+  setView: (view) => set({ view }),
   sessionId: null,
   setSessionId: (id) => set({ sessionId: id }),
   messages: [],
@@ -63,4 +73,8 @@ export const useUiStore = create<UiState>((set, get) => ({
   appendMessages: (messages) => set({ messages: [...get().messages, ...messages] }),
   topics: [],
   setTopics: (topics) => set({ topics }),
+  topicId: null,
+  setTopicId: (id) => set({ topicId: id }),
+  micState: "idle",
+  setMicState: (micState) => set({ micState }),
 }));

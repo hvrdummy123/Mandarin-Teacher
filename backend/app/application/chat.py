@@ -145,6 +145,66 @@ async def analyse_turn(
         )
 
 
+async def open_topic_with_ai(
+    db: Session,
+    services: ChatServices,
+    *,
+    topic_id: str,
+    level: int,
+) -> dict[str, object]:
+    """Create a topic session and have the AI speak first in role."""
+    topic = get_topic(topic_id)
+    if topic is None:
+        raise ValueError("topic not found")
+    session = create_session(db, mode="topic", topic_id=topic_id, level=level)
+    vocab_hint = services.hint_for_level(session.level)
+    rules = rules_for_level(session.level)
+    system = render(
+        "opening.txt",
+        level=session.level,
+        hsk_band=rules.hsk_band,
+        max_chars=rules.max_sentence_chars,
+        topic_block=_topic_block(topic),
+        vocab_hint="、".join(vocab_hint) or "(basic greetings)",
+    )
+    try:
+        reply = await services.llm.complete(
+            system=system,
+            user="(session start — greet me in character now)",
+            json_mode=False,
+        )
+    except AllProvidersFailed as exc:
+        raise RuntimeError(str(exc)) from exc
+
+    analysis = await analyse_turn(
+        services,
+        level=session.level,
+        topic=topic,
+        user_text="(session start)",
+        reply_text=reply,
+    )
+    tokens = services.analyzer.tokens_as_dicts(reply)
+    assistant_msg = m.Message(
+        session_id=session.id,
+        role="assistant",
+        text=reply,
+        pinyin_json=tokens,
+        translation=analysis.reply_translation_en or None,
+    )
+    db.add(assistant_msg)
+    db.flush()
+    return {
+        "session": {
+            "id": session.id,
+            "mode": session.mode,
+            "topic_id": session.topic_id,
+            "level": session.level,
+            "created_at": session.created_at.isoformat() if session.created_at else None,
+        },
+        "assistant_message": _message_dict(assistant_msg, None),
+    }
+
+
 async def send_text_message(
     db: Session,
     services: ChatServices,
