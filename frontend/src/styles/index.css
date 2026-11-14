@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #f6f1e7;
+  --ink: #1f1b16;
+  --vermilion: #c8372d;
+  --jade: #3f7d6b;
+  --muted: #8a8173;
+  color-scheme: light;
+}
+
+.dark {
+  --paper: #1a1816;
+  --ink: #f6f1e7;
+  --vermilion: #e06a5c;
+  --jade: #6aa890;
+  --muted: #a39a8c;
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+  background-image:
+    radial-gradient(ellipse at top left, rgba(200, 55, 45, 0.04), transparent 45%),
+    radial-gradient(ellipse at bottom right, rgba(63, 125, 107, 0.06), transparent 40%);
+}
+
+.dark body,
+.dark {
+  background-image:
+    radial-gradient(ellipse at top left, rgba(224, 106, 92, 0.08), transparent 45%),
+    radial-gradient(ellipse at bottom right, rgba(106, 168, 144, 0.08), transparent 40%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

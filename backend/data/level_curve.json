@@ -1,0 +1,9 @@
+{
+  "_comment": "Optional overrides for level policy. Missing keys use the formula in domain/level.py (P1).",
+  "defaults": {
+    "vocab_n1": 150,
+    "vocab_n100": 11000,
+    "out_of_vocab_threshold": 0.12
+  },
+  "levels": {}
+}

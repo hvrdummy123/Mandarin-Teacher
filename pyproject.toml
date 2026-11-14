@@ -1,0 +1,87 @@
+[project]
+name = "duihua"
+version = "0.1.0"
+description = "A personal Mandarin speaking coach"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "sqlalchemy>=2.0.36",
+    "alembic>=1.14.0",
+    "httpx>=0.27.0",
+    "structlog>=24.4.0",
+    "faster-whisper>=1.1.0",
+    "webrtcvad>=2.0.10",
+    "edge-tts>=6.1.0",
+    "rapidocr-onnxruntime>=1.3.24",
+    "jieba>=0.42.1",
+    "pypinyin>=0.53.0",
+    "praat-parselmouth>=0.4.5",
+    "numpy>=1.26.0",
+    "pillow>=10.4.0",
+    "python-multipart>=0.0.12",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.0",
+    "vulture>=2.13",
+    "types-Pillow>=10.0.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["backend"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"backend/migrations/**" = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+mypy_path = "backend"
+packages = ["app"]
+exclude = ["backend/migrations/", "backend/tests/"]
+
+[[tool.mypy.overrides]]
+module = [
+    "jieba.*",
+    "pypinyin.*",
+    "webrtcvad.*",
+    "faster_whisper.*",
+    "edge_tts.*",
+    "rapidocr_onnxruntime.*",
+    "parselmouth.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["backend/tests"]
+pythonpath = ["backend"]
+
+[tool.coverage.run]
+source = ["backend/app"]
+omit = ["backend/app/adapters/*"]
+
+[tool.coverage.report]
+show_missing = true

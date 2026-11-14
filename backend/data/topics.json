@@ -1,0 +1,302 @@
+[
+  {
+    "id": "restaurant",
+    "title_en": "Ordering at a restaurant",
+    "title_zh": "在餐厅点餐",
+    "ai_role": "A friendly waiter at a casual Chinese restaurant",
+    "scenario": "You are seated and ready to order food and drinks.",
+    "user_goal": "Order a meal, ask about a dish, and request the bill.",
+    "keywords": ["菜单", "点菜", "好吃", "买单", "服务员"],
+    "min_level": 5
+  },
+  {
+    "id": "cafe",
+    "title_en": "Cafe and tea",
+    "title_zh": "咖啡馆和茶",
+    "ai_role": "A barista at a small cafe",
+    "scenario": "Ordering coffee or tea and chatting lightly.",
+    "user_goal": "Order a drink and make small talk about preferences.",
+    "keywords": ["咖啡", "茶", "拿铁", "甜", "座位"],
+    "min_level": 5
+  },
+  {
+    "id": "street_food",
+    "title_en": "Street food and markets",
+    "title_zh": "小吃和集市",
+    "ai_role": "A street-food vendor at a night market",
+    "scenario": "Browsing stalls and buying snacks.",
+    "user_goal": "Ask prices, choose a snack, and buy it.",
+    "keywords": ["多少钱", "好吃", "辣", "一份", "夜市"],
+    "min_level": 8
+  },
+  {
+    "id": "grocery",
+    "title_en": "Grocery shopping",
+    "title_zh": "买菜购物",
+    "ai_role": "A shop assistant in a grocery store",
+    "scenario": "Finding everyday ingredients.",
+    "user_goal": "Find items on a short shopping list and check prices.",
+    "keywords": ["蔬菜", "水果", "公斤", "新鲜", "在哪里"],
+    "min_level": 8
+  },
+  {
+    "id": "clothes",
+    "title_en": "Clothes shopping and bargaining",
+    "title_zh": "买衣服和讲价",
+    "ai_role": "A clothing-shop seller who expects some bargaining",
+    "scenario": "Trying on clothes and negotiating price.",
+    "user_goal": "Ask for a size, try something on, and bargain a little.",
+    "keywords": ["衣服", "尺码", "便宜一点", "试穿", "颜色"],
+    "min_level": 15
+  },
+  {
+    "id": "introduce",
+    "title_en": "Introducing yourself",
+    "title_zh": "自我介绍",
+    "ai_role": "A new classmate meeting you for the first time",
+    "scenario": "First meeting and basic introductions.",
+    "user_goal": "Say your name, where you are from, and what you do.",
+    "keywords": ["名字", "哪里人", "工作", "高兴认识你", "学生"],
+    "min_level": 1
+  },
+  {
+    "id": "family",
+    "title_en": "Family and relatives",
+    "title_zh": "家人和亲戚",
+    "ai_role": "A curious friend asking about your family",
+    "scenario": "Talking about family members.",
+    "user_goal": "Describe your family in a few sentences.",
+    "keywords": ["爸爸", "妈妈", "哥哥", "姐姐", "家人"],
+    "min_level": 5
+  },
+  {
+    "id": "friends",
+    "title_en": "Friends and making plans",
+    "title_zh": "朋友和约出来",
+    "ai_role": "A friend suggesting weekend plans",
+    "scenario": "Making plans to meet up.",
+    "user_goal": "Suggest a time and place to meet a friend.",
+    "keywords": ["周末", "一起", "怎么样", "见面", "时间"],
+    "min_level": 10
+  },
+  {
+    "id": "weather",
+    "title_en": "Weather and seasons",
+    "title_zh": "天气和季节",
+    "ai_role": "A neighbour chatting about the weather",
+    "scenario": "Small talk about today's weather and seasons.",
+    "user_goal": "Comment on the weather and mention a season preference.",
+    "keywords": ["天气", "热", "冷", "下雨", "春天"],
+    "min_level": 5
+  },
+  {
+    "id": "directions",
+    "title_en": "Directions and getting around",
+    "title_zh": "问路和出行",
+    "ai_role": "A helpful local on the street",
+    "scenario": "You are looking for a place nearby.",
+    "user_goal": "Ask for directions and confirm you understood.",
+    "keywords": ["怎么走", "左转", "右转", "远吗", "附近"],
+    "min_level": 12
+  },
+  {
+    "id": "taxi",
+    "title_en": "Taking a taxi or ride-hailing",
+    "title_zh": "打车",
+    "ai_role": "A taxi or ride-hailing driver",
+    "scenario": "Getting a ride across town.",
+    "user_goal": "Tell the driver where to go and ask about the fare.",
+    "keywords": ["去", "地址", "多久", "多少钱", "停"],
+    "min_level": 12
+  },
+  {
+    "id": "metro",
+    "title_en": "Metro and trains",
+    "title_zh": "地铁和火车",
+    "ai_role": "A station attendant",
+    "scenario": "Navigating the metro or buying a train ticket.",
+    "user_goal": "Find the right line or platform and buy a ticket.",
+    "keywords": ["地铁", "几号线", "换乘", "票", "站"],
+    "min_level": 15
+  },
+  {
+    "id": "airport",
+    "title_en": "Airport and flights",
+    "title_zh": "机场和航班",
+    "ai_role": "An airport check-in or information desk worker",
+    "scenario": "Checking in or finding a gate.",
+    "user_goal": "Check in for a flight and find your gate.",
+    "keywords": ["航班", "登机牌", "行李", "登机口", "延误"],
+    "min_level": 20
+  },
+  {
+    "id": "hotel",
+    "title_en": "Hotel check-in",
+    "title_zh": "酒店入住",
+    "ai_role": "A hotel front-desk receptionist",
+    "scenario": "Arriving at a hotel to check in.",
+    "user_goal": "Check in, ask about breakfast and Wi-Fi.",
+    "keywords": ["预订", "房间", "护照", "早餐", "Wi-Fi"],
+    "min_level": 15
+  },
+  {
+    "id": "phone_booking",
+    "title_en": "Booking a table or appointment on the phone",
+    "title_zh": "电话预约",
+    "ai_role": "A restaurant or clinic receptionist on the phone",
+    "scenario": "Calling to reserve a table or appointment.",
+    "user_goal": "Book a time for two people and confirm the details.",
+    "keywords": ["预约", "几点", "几位", "姓名", "可以吗"],
+    "min_level": 20
+  },
+  {
+    "id": "doctor",
+    "title_en": "At the doctor or pharmacy",
+    "title_zh": "看病和药店",
+    "ai_role": "A doctor or pharmacist",
+    "scenario": "Describing mild symptoms and getting advice.",
+    "user_goal": "Describe how you feel and ask for medicine advice.",
+    "keywords": ["不舒服", "头痛", "发烧", "药", "过敏"],
+    "min_level": 25
+  },
+  {
+    "id": "banking",
+    "title_en": "Banking and paying (WeChat Pay, Alipay)",
+    "title_zh": "银行和支付",
+    "ai_role": "A bank clerk or shop cashier",
+    "scenario": "Paying or asking about mobile payments.",
+    "user_goal": "Pay with WeChat Pay or Alipay and confirm it went through.",
+    "keywords": ["微信支付", "支付宝", "付款", "刷卡", "密码"],
+    "min_level": 20
+  },
+  {
+    "id": "phone_problems",
+    "title_en": "Phone and internet problems",
+    "title_zh": "手机和网络问题",
+    "ai_role": "A phone-shop or ISP support person",
+    "scenario": "Your phone or Wi-Fi is not working.",
+    "user_goal": "Explain the problem and ask for a fix.",
+    "keywords": ["网络", "信号", "连不上", "重启", "流量"],
+    "min_level": 25
+  },
+  {
+    "id": "job_interview",
+    "title_en": "Job interview",
+    "title_zh": "工作面试",
+    "ai_role": "A hiring manager conducting an interview",
+    "scenario": "A short job interview in Mandarin.",
+    "user_goal": "Introduce your experience and answer two questions.",
+    "keywords": ["经验", "为什么", "优点", "工作", "面试"],
+    "min_level": 40
+  },
+  {
+    "id": "office",
+    "title_en": "Office and colleagues",
+    "title_zh": "办公室和同事",
+    "ai_role": "A friendly colleague at work",
+    "scenario": "Everyday office chat and a small favour.",
+    "user_goal": "Ask a colleague for help with a work task.",
+    "keywords": ["会议", "邮件", "帮忙", "截止日期", "同事"],
+    "min_level": 30
+  },
+  {
+    "id": "studying",
+    "title_en": "Studying and university life",
+    "title_zh": "学习和大学生活",
+    "ai_role": "A classmate on campus",
+    "scenario": "Talking about classes and campus life.",
+    "user_goal": "Talk about your major and a class you like or dislike.",
+    "keywords": ["专业", "考试", "作业", "图书馆", "课"],
+    "min_level": 20
+  },
+  {
+    "id": "hobbies",
+    "title_en": "Hobbies and free time",
+    "title_zh": "爱好和空闲时间",
+    "ai_role": "A new friend asking about hobbies",
+    "scenario": "Sharing what you do in free time.",
+    "user_goal": "Describe two hobbies and invite someone to join one.",
+    "keywords": ["爱好", "空闲", "喜欢", "一起", "周末"],
+    "min_level": 10
+  },
+  {
+    "id": "sports",
+    "title_en": "Sports and fitness",
+    "title_zh": "运动和健身",
+    "ai_role": "A gym buddy or sports teammate",
+    "scenario": "Talking about exercise habits.",
+    "user_goal": "Talk about a sport you play and make a plan to exercise.",
+    "keywords": ["跑步", "健身", "篮球", "累", "锻炼"],
+    "min_level": 15
+  },
+  {
+    "id": "movies",
+    "title_en": "Movies, music and TV",
+    "title_zh": "电影、音乐和电视",
+    "ai_role": "A friend who loves films and music",
+    "scenario": "Recommending and discussing entertainment.",
+    "user_goal": "Recommend a film or song and say why you like it.",
+    "keywords": ["电影", "音乐", "好看", "演员", "推荐"],
+    "min_level": 15
+  },
+  {
+    "id": "cooking",
+    "title_en": "Food and cooking at home",
+    "title_zh": "在家做饭",
+    "ai_role": "A friend who likes cooking",
+    "scenario": "Talking about a simple home-cooked meal.",
+    "user_goal": "Describe a dish you can cook and the main steps.",
+    "keywords": ["做菜", "材料", "炒", "好吃", "简单"],
+    "min_level": 20
+  },
+  {
+    "id": "festivals",
+    "title_en": "Holidays and festivals (Spring Festival, Mid-Autumn)",
+    "title_zh": "节日（春节、中秋）",
+    "ai_role": "A friend talking about Chinese festivals",
+    "scenario": "Discussing Spring Festival or Mid-Autumn traditions.",
+    "user_goal": "Name a festival and describe one tradition.",
+    "keywords": ["春节", "中秋", "月饼", "团圆", "红包"],
+    "min_level": 20
+  },
+  {
+    "id": "renting",
+    "title_en": "Renting a home",
+    "title_zh": "租房子",
+    "ai_role": "A landlord or rental agent",
+    "scenario": "Viewing or asking about a flat to rent.",
+    "user_goal": "Ask about rent, deposit, and what's included.",
+    "keywords": ["房租", "押金", "房间", "家具", "合同"],
+    "min_level": 30
+  },
+  {
+    "id": "travel",
+    "title_en": "Travel plans and sightseeing",
+    "title_zh": "旅行和观光",
+    "ai_role": "A travel companion planning a trip",
+    "scenario": "Planning a short trip together.",
+    "user_goal": "Suggest a destination and one thing you want to see.",
+    "keywords": ["旅行", "景点", "门票", "酒店", "计划"],
+    "min_level": 20
+  },
+  {
+    "id": "news",
+    "title_en": "News and opinions",
+    "title_zh": "新闻和看法",
+    "ai_role": "A thoughtful friend discussing a news topic",
+    "scenario": "Light discussion of a current topic (keep it calm).",
+    "user_goal": "Share a simple opinion and ask what they think.",
+    "keywords": ["新闻", "觉得", "为什么", "同意", "看法"],
+    "min_level": 45
+  },
+  {
+    "id": "tech",
+    "title_en": "Technology and apps",
+    "title_zh": "科技和应用程序",
+    "ai_role": "A tech-savvy friend",
+    "scenario": "Talking about phones and everyday apps.",
+    "user_goal": "Describe an app you use and what it helps with.",
+    "keywords": ["手机", "应用", "下载", "方便", "软件"],
+    "min_level": 25
+  }
+]
