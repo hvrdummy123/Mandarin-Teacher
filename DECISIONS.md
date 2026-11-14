@@ -10,5 +10,8 @@ One-liners for choices the SPEC left open.
 - Frontend: no TanStack Query in P0; plain fetch later if needed. Zustand only for theme/UI shell state.
 - HSK checksum left empty in `fetch_data.py` because the upstream file moves; script prints sha256 for pinning later.
 - HSK source: `drkameleon/complete-hsk-vocabulary` (MIT) — the krmanik path in SPEC §3 404s; we take the lowest `new-N` band per word.
+- Word "播放" in the hover popover is disabled until P2 TTS; text chat does not need streamed audio yet.
+- Gemini/OpenRouter stream() completes then chunks for P1 — real SSE when voice latency budgets matter in P2.
+- 不/一 sandhi applied in TextAnalyzer after jieba (and across split tokens) because pypinyin alone is inconsistent on compounds jieba splits.
 
 - Gemini model ids in `.env.example` are snapshots (`gemini-2.0-flash` / `flash-lite`); free-tier names change — verify against Google docs when wiring P1.

@@ -47,6 +47,8 @@ src = ["backend"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+# FastAPI Depends() in defaults is the framework's normal pattern.
+ignore = ["B008"]
 
 [tool.ruff.lint.per-file-ignores]
 "backend/migrations/**" = ["E501"]

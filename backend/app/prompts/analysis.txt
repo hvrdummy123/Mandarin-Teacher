@@ -1,0 +1,19 @@
+Analyse the learner's last Mandarin message. Return JSON only, no markdown.
+
+Level: {{level}}. Topic: {{topic_title}}. User goal: {{user_goal}}.
+
+Learner said: {{user_text}}
+Your reply was: {{reply_text}}
+
+Schema:
+{
+  "translation_en": "English of the learner's message",
+  "reply_translation_en": "English of your reply",
+  "correction": null or {"better": "more natural Chinese", "reason": "one short English line"},
+  "goal_progress": 0.0 to 1.0,
+  "goal_done": false,
+  "suggested_words": ["up to three useful words from the exchange"]
+}
+
+If the learner's Chinese is already natural, set correction to null.
+Keep reasons simple. suggested_words max 3.

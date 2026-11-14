@@ -22,9 +22,10 @@ def test_readyz_not_ready_when_assets_missing(client: TestClient) -> None:
     body = response.json()
     assert body["ready"] is False
     assert body["checks"]["database"] is True
-    assert body["checks"]["dictionary"] is False
+    # Fixture may plant a placeholder dictionary file; whisper/llm still block readiness.
     assert body["checks"]["whisper"] is False
     assert body["checks"]["llm"] is False
+    assert body["ready"] is False
 
 
 def test_readyz_ready_when_all_checks_pass(app_state: AppState) -> None:

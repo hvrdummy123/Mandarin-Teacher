@@ -8,9 +8,18 @@ from pathlib import Path
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.adapters.dictionary.sqlite_repo import CedictSqliteRepo
+from app.adapters.llm.fallback import FallbackChain
+from app.adapters.llm.gemini import GeminiAdapter
+from app.adapters.llm.ollama import OllamaAdapter
+from app.adapters.llm.openrouter import OpenRouterAdapter
 from app.adapters.persistence.db import create_db_engine, make_session_factory
+from app.application.chat import ChatServices
+from app.application.text_analyzer import TextAnalyzer
 from app.config import Settings, get_settings
 from app.logging import get_logger
+from app.ports.dictionary import DictionaryRepo
+from app.ports.llm import LLMProvider
 
 log = get_logger(__name__)
 
@@ -20,20 +29,75 @@ class AppState:
     settings: Settings
     engine: Engine
     session_factory: sessionmaker[Session]
-    # Last 50 voice-turn timing dicts; filled in later phases.
+    dictionary: DictionaryRepo | None = None
+    llm: FallbackChain | None = None
+    chat_services: ChatServices | None = None
     timings: list[dict[str, object]] = field(default_factory=list)
 
     def refresh_readiness_flags(self) -> None:
-        """Probe dictionary file and whisper model presence for /readyz."""
         dict_path = Path(self.settings.dictionary_db_path)
         self.settings.dictionary_loaded = dict_path.is_file() and dict_path.stat().st_size > 0
-        # Whisper is loaded lazily in P2; for P0 we only check whether a cache dir exists
-        # or the configured model name is known — actual load happens later.
-        # Mark unloaded until the STT adapter reports ready.
-        # Leave whisper_loaded as-is if something already set it.
 
 
-def build_container(settings: Settings | None = None) -> AppState:
+def build_llm_chain(settings: Settings, extra: list[LLMProvider] | None = None) -> FallbackChain:
+    providers: list[LLMProvider] = list(extra or [])
+    for name in settings.llm_provider_list:
+        if name == "gemini" and settings.gemini_api_key:
+            providers.append(
+                GeminiAdapter(
+                    settings.gemini_api_key,
+                    reply_model=settings.gemini_reply_model,
+                    analysis_model=settings.gemini_analysis_model,
+                )
+            )
+        elif name == "openrouter" and settings.openrouter_api_key:
+            providers.append(
+                OpenRouterAdapter(
+                    settings.openrouter_api_key,
+                    reply_model=settings.openrouter_reply_model,
+                    analysis_model=settings.openrouter_analysis_model,
+                )
+            )
+        elif name == "ollama" and settings.ollama_base_url:
+            providers.append(
+                OllamaAdapter(
+                    settings.ollama_base_url,
+                    reply_model=settings.ollama_reply_model,
+                    analysis_model=settings.ollama_analysis_model,
+                )
+            )
+    return FallbackChain(providers=providers)
+
+
+def build_chat_services(
+    settings: Settings,
+    dictionary: DictionaryRepo,
+    llm: FallbackChain,
+) -> ChatServices:
+    ranked: list[str] = []
+    if isinstance(dictionary, CedictSqliteRepo):
+        try:
+            ranked = dictionary.words_by_hsk_then_freq(12000)
+        except Exception:
+            ranked = []
+    if not ranked and hasattr(dictionary, "hsk"):
+        # Memory dict in tests: sort by HSK then word.
+        hsk_map: dict[str, int] = dictionary.hsk
+        ranked = sorted(hsk_map.keys(), key=lambda w: (hsk_map[w], w))
+    return ChatServices(
+        llm=llm,
+        analyzer=TextAnalyzer(dictionary),
+        ranked_vocab=ranked,
+        out_of_vocab_threshold=settings.level_out_of_vocab_threshold,
+    )
+
+
+def build_container(
+    settings: Settings | None = None,
+    *,
+    llm: FallbackChain | None = None,
+    dictionary: DictionaryRepo | None = None,
+) -> AppState:
     settings = settings or get_settings()
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     Path(settings.tts_cache_dir).mkdir(parents=True, exist_ok=True)
@@ -41,11 +105,26 @@ def build_container(settings: Settings | None = None) -> AppState:
     engine = create_db_engine(settings)
     session_factory = make_session_factory(engine)
     state = AppState(settings=settings, engine=engine, session_factory=session_factory)
+
+    if dictionary is None and Path(settings.dictionary_db_path).is_file():
+        try:
+            dictionary = CedictSqliteRepo(Path(settings.dictionary_db_path))
+            dictionary.connect()
+        except Exception as exc:
+            log.warning("dictionary_load_failed", error=str(exc))
+            dictionary = None
+
+    state.dictionary = dictionary
+    state.llm = llm or build_llm_chain(settings)
+    if dictionary is not None and state.llm is not None:
+        state.chat_services = build_chat_services(settings, dictionary, state.llm)
+
     state.refresh_readiness_flags()
     log.info(
         "container_ready",
         dictionary_loaded=settings.dictionary_loaded,
         whisper_loaded=settings.whisper_loaded,
         llm_providers=settings.configured_llm_providers(),
+        chat_ready=state.chat_services is not None,
     )
     return state

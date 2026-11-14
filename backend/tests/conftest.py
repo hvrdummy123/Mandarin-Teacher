@@ -11,9 +11,12 @@ from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy.engine import Engine
 
+from app.adapters.dictionary.memory import seed_basic_dictionary
+from app.adapters.llm.fake import FakeLLM
+from app.adapters.llm.fallback import FallbackChain
 from app.adapters.persistence.db import create_db_engine, make_session_factory
 from app.config import Settings, get_settings
-from app.container import AppState
+from app.container import AppState, build_chat_services
 from app.main import create_app
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
@@ -50,12 +53,24 @@ def migrated_engine(tmp_settings: Settings) -> Generator[Engine, None, None]:
 
 
 @pytest.fixture
-def app_state(tmp_settings: Settings, migrated_engine: Engine) -> AppState:
+def fake_llm() -> FakeLLM:
+    return FakeLLM()
+
+
+@pytest.fixture
+def app_state(tmp_settings: Settings, migrated_engine: Engine, fake_llm: FakeLLM) -> AppState:
+    dictionary = seed_basic_dictionary()
+    llm = FallbackChain(providers=[fake_llm])
     state = AppState(
         settings=tmp_settings,
         engine=migrated_engine,
         session_factory=make_session_factory(migrated_engine),
+        dictionary=dictionary,
+        llm=llm,
+        chat_services=build_chat_services(tmp_settings, dictionary, llm),
     )
+    # Pretend dictionary file exists for readiness probes that check the path.
+    Path(tmp_settings.dictionary_db_path).write_bytes(b"x")
     state.refresh_readiness_flags()
     return state
 

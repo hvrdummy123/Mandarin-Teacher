@@ -17,21 +17,40 @@ uv run python scripts/fetch_data.py --out data/dictionary.db --cache data/cache
 
 | Suite | Result |
 | --- | --- |
-| Backend unit + integration | **10 passed** |
-| Ruff check + format | **pass** |
-| mypy strict on `app/` | **pass** |
-| Frontend eslint | **pass** |
-| `tsc --noEmit` | **pass** |
-| Vitest (Shell) | **1 passed** |
-| Vite production build | **pass** (JS gzip ≈ 47 KB) |
-| `make data` / fetch_data | **pass** — 125413 CC-CEDICT rows, 11470 HSK rows |
-| `/healthz` | **ok** |
-| `/readyz` | **503** as expected without Whisper load + LLM keys; `database` + `dictionary` true |
+| Backend unit + integration | **10 passed** (P0 baseline; superseded by P1 totals below) |
+| Ruff / mypy | **pass** |
+| Frontend | **pass** |
+| `make data` | **pass** |
 
-### Could not verify
+### Could not verify (P0)
 
-- Real microphone / browser push-to-talk (no voice stack yet).
-- Whisper model load (P2).
-- Live Gemini / OpenRouter / Ollama calls (no keys required for P0; `/readyz` llm check correctly false without keys).
-- GitHub Actions CI on a clean runner (workflow file is present; not executed here).
-- `make dev` full interactive session (script exists; API smoke-tested separately).
+- Real microphone / Whisper / live LLM; CI on a clean runner; full interactive `make dev`.
+
+---
+
+## Phase 1
+
+Commands run (2026-11-14):
+
+```bash
+uv run ruff check backend && uv run ruff format --check backend && uv run mypy
+PYTHONPATH=backend uv run pytest backend/tests -q \
+  --cov=backend/app/domain --cov=backend/app/application --cov-report=term-missing
+cd frontend && npm run lint && npx tsc --noEmit && npm test -- --run && npm run build
+```
+
+| Suite | Result |
+| --- | --- |
+| Backend tests | **35 passed** |
+| domain/ + application/ coverage | **90%** (target ≥85%) |
+| Ruff + mypy | **pass** |
+| Frontend eslint / tsc | **pass** |
+| Vitest | **4 passed** (Shell toggles, RubyText, tones) |
+| Vite build | **pass** (JS gzip ≈ 51 KB) |
+
+### Could not verify (P1)
+
+- Live Gemini / OpenRouter / Ollama replies (tests use `FakeLLM`; adapters are wired but not called without keys).
+- Hover "播放" TTS (deferred to P2; button disabled).
+- Playwright e2e text-chat flow (SPEC lists broader e2e later; P1 covered by Vitest + REST integration).
+- GitHub Actions on a clean runner.

@@ -4,7 +4,7 @@ I built this because I study Mandarin in apps but have almost nobody to speak wi
 
 ## Status
 
-**Phase 0 (scaffold)** is in place: repo layout, config, logging, SQLite + Alembic, health endpoints, data fetch script, and an empty UI shell with the paper/ink theme. Chat, voice, and scoring come in later phases.
+**Phase 1 (text chat)** works: sessions, FakeLLM/real LLM fallback chain, rich transcript (ruby pinyin + hover + save word), corrections, level/topic pickers, level post-check. Voice and tone scoring are still later.
 
 ## Setup
 
